@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>View Expenses</title>
+<style>
+  body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+  background-color: #f4f6f9;
+}
+
+h2 {
+  text-align: center;
+}
+
+.dashboard {
+  display: flex;
+  gap: 20px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
+  min-width: 200px;
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+.card:nth-child(1) {
+  border-left: 5px solid #4CAF50;
+}
+
+.card:nth-child(2) {
+  border-left: 5px solid #2196F3;
+}
+
+.card:nth-child(3) {
+  border-left: 5px solid #FF9800;
+}
+
+.card:nth-child(4) {
+  border-left: 5px solid #F44336;
+}
+
+.card:nth-child(5) {
+  border-left: 5px solid #9C27B0;
+}
+
+.card:nth-child(6) {
+  border-left: 5px solid #009688;
+}
+
+.card:nth-child(7) {
+  border-left: 5px solid #795548;
+}
+
+.card:nth-child(8) {
+  border-left: 5px solid #E91E63;
+}
+.card h3 {
+  margin: 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+}
+
+th {
+  background: #4CAF50;
+  color: white;
+  position: sticky;
+  top: 0;
+}
+
+button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #2563eb;
+  color: white;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+button:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+.edit-btn {
+  background: #f59e0b;
+  color: white;
+}
+
+.delete-btn {
+  background: #ef4444;
+  color: white;
+}
+#expenseChart {
+  max-width: 400px;
+  max-height: 400px;
+  margin: 20px auto;
+  display: block;
+}
+.summary-container {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.summary-container .card {
+  flex: 1;
+  min-width: 300px;
+}
+.summary-container .card {
+  min-height: 250px;
+}
+#expenseChart {
+  width: 300px !important;
+  height: 300px !important;
+  margin: auto;
+}
+#monthlyChart {
+  max-width: 800px;
+  max-height: 400px;
+  margin: 20px auto;
+  display: block;
+}
+.navbar {
+  background: #1e3a8a;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+button:hover {
+  opacity: 0.9;
+}
+#monthlyChart{
+  width: 100% !important;
+  max-height: 300px !important;
+}
+.summary-box p{
+  background: #f8f9fa;
+  padding: 10px;
+  border-radius: 8px;
+  margin: 10px 0;
+  font-weight: bold;
+}
+#aiSuggestions p {
+  background: #f3f4f6;
+  padding: 10px;
+  border-radius: 8px;
+  margin: 10px 0;
+  font-weight: bold;
+}
+input, select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin: 5px;
+  font-size: 14px;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 5px rgba(37, 99, 235, 0.3);
+}
+.dark-mode {
+  background-color: #121212;
+  color: white;
+}
+
+.dark-mode .card {
+  background-color: #1e1e1e;
+  color: white;
+}
+
+.dark-mode table {
+  background-color: #1e1e1e;
+  color: white;
+}
+
+.dark-mode th {
+  background-color: #333;
+}
+
+.dark-mode td {
+  border-color: #444;
+}
+
+.dark-mode .summary-box p {
+  background-color: #2a2a2a;
+  color: white;
+}
+tbody tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+tbody tr:hover {
+  background-color: #dbeafe;
+  transition: 0.2s;
+}
+.dark-mode tbody tr:nth-child(even) {
+  background-color: #222;
+}
+
+.dark-mode tbody tr:hover {
+  background-color: #333;
+}
+.progress-bar {
+  width: 100%;
+  height: 20px;
+  background: #ddd;
+  border-radius: 10px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+#progressFill {
+  height: 100%;
+  width: 0%;
+  background: #4CAF50;
+  transition: 0.5s;
+}
+#aiSuggestions p:hover {
+  transform: scale(1.02);
+  transition: 0.2s;
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+
+<body>
+<div class="navbar">
+
+  <h1>Student Expense Tracker</h1>
+
+  <div>
+    <h3 id="welcomeUser"></h3>
+
+    <button onclick="toggleDarkMode()">
+      🌙 Dark Mode
+    </button>
+
+    <button onclick="logout()">
+      Logout
+    </button>
+  </div>
+
+</div>
+<h2>All Expenses</h2>
+<button onclick="exportCSV()">
+  Export CSV
+</button>
+<button onclick="downloadPDF()">
+  Export PDF
+</button>
+<div class="dashboard">
+
+  <div class="card">
+    <h3 id="totalExpense">💰 Total Expense: ₹0</h3>
+  </div>
+
+  <div class="card">
+    <h3 id="totalTransactions">📊 Total Transactions: 0</h3>
+  </div>
+
+  <div class="card">
+    <h3 id="budgetDisplay">🎯 Budget: ₹0</h3>
+  </div>
+
+  <div class="card">
+    <h3 id="remainingBudget">💵 Remaining: ₹0</h3>
+  </div>
+  
+  <div class="card">
+    <h3 id="highestExpense">📈 Highest: ₹0</h3>
+  </div>
+
+  <div class="card">
+   <h3 id="lowestExpense">📉 Lowest: ₹0</h3>
+  </div>
+
+  <div class="card">
+    <h3 id="averageExpense">🧮 Average: ₹0</h3>
+  </div>
+
+  <div class="card">
+    <h3 id="topCategory">🏆 Top Category: -</h3>
+  </div>
+  <div class="card">
+  <h3>🤖 AI Suggestions</h3>
+
+  <div id="aiSuggestions">
+
+    <p>No Suggestions Yet</p>
+
+    </div>
+  </div>
+
+  <div class="card">
+  <h3 id="budgetPercent">📋 Used: 0%</h3>
+  <div class="progress-bar">
+  <div id="progressFill"></div>
+</div>
+</div>
+</div>
+<hr>
+
+<h3>Set Monthly Budget</h3>
+
+<input
+  type="number"
+  id="budgetAmount"
+  placeholder="Enter Budget Amount">
+
+<button onclick="saveBudget()">
+  Save Budget
+</button>
+
+
+<hr>
+<div class="summary-container">
+
+  <div class="card">
+    <h3>Category Summary</h3>
+    <div id="categorySummary" class="summary-box"></div>
+  </div>
+
+  <div class="card">
+    <h3>Expense Distribution</h3>
+    <canvas id="expenseChart"></canvas>
+    <hr>
+
+    <h3>Monthly Expense Report</h3>
+
+    <canvas id="monthlyChart"></canvas>
+  </div>
+
+</div>
+<hr>
+<h3>Filter By Date</h3>
+
+From:
+<input type="date" id="fromDate">
+
+To:
+<input type="date" id="toDate">
+
+<button onclick="filterByDate()">
+  Filter
+</button>
+
+<button onclick="loadExpenses()">
+  Reset
+</button>
+
+<hr>
+<h3>Search Expense</h3>
+
+<input
+  type="text"
+  id="searchInput"
+  placeholder="Search by title..."
+  onkeyup="searchExpenses()">
+
+<hr>
+<select id="categoryFilter" onchange="filterExpenses()">
+  <option value="all">All Categories</option>
+  <option value="food">Food</option>
+  <option value="drink">Drink</option>
+  <option value="travel">Travel</option>
+  <option value="shopping">Shopping</option>
+</select>
+
+
+
+<hr>
+<table border="1">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Title</th>
+      <th>Amount</th>
+      <th>Category</th>
+      <th>Date</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+
+  <tbody id="expenseTable"></tbody>
+</table>
+
+<script>
+const userId = localStorage.getItem("userId");
+const userName = localStorage.getItem("userName");
+if (localStorage.getItem("darkMode") === "on") {
+  document.body.classList.add("dark-mode");
+}
+let expenseChart = null;
+let monthlyChart = null;
+document.getElementById("welcomeUser").innerHTML =
+  "👋 Welcome, <b>" + userName + "</b>";
+
+if (!userId) {
+  alert("Please login first");
+  window.location.href = "test.html";
+}
+function searchExpenses() {
+
+  const searchText =
+    document.getElementById("searchInput")
+    .value
+    .toLowerCase();
+
+  const rows =
+    document.querySelectorAll("#expenseTable tr");
+
+  rows.forEach(row => {
+
+    const title =
+      row.children[1]
+      .innerText
+      .toLowerCase();
+
+    if (title.includes(searchText)) {
+      row.style.display = "";
+    } else {
+      row.style.display = "none";
+    }
+
+  });
+}
+function filterExpenses() {
+
+  const selectedCategory =
+    document.getElementById("categoryFilter")
+    .value
+    .toLowerCase();
+
+  const rows =
+    document.querySelectorAll("#expenseTable tr");
+
+  rows.forEach(row => {
+
+    const category =
+      row.children[3]
+      .innerText
+      .toLowerCase();
+
+    if (
+      selectedCategory === "all" ||
+      category === selectedCategory
+    ) {
+      row.style.display = "";
+    } else {
+      row.style.display = "none";
+    }
+
+  });
+}
+function filterByDate() {
+
+  const fromDate =
+    document.getElementById("fromDate").value;
+
+  const toDate =
+    document.getElementById("toDate").value;
+
+  const rows =
+    document.querySelectorAll("#expenseTable tr");
+
+  rows.forEach(row => {
+
+    const expenseDate =
+      row.getAttribute("data-date")
+      ?.split("T")[0];
+
+    if (!expenseDate) return;
+
+    if (
+      expenseDate >= fromDate &&
+      expenseDate <= toDate
+    ) {
+      row.style.display = "";
+    } else {
+      row.style.display = "none";
+    }
+
+  });
+}
+function exportCSV() {
+
+  let csv =
+    "ID,Title,Amount,Category,Date\n";
+
+  const rows =
+    document.querySelectorAll("#expenseTable tr");
+
+  rows.forEach(row => {
+
+    const cols =
+      row.querySelectorAll("td");
+
+    if (cols.length > 0) {
+
+      csv +=
+        cols[0].innerText + "," +
+        cols[1].innerText + "," +
+        cols[2].innerText + "," +
+        cols[3].innerText + "," +
+        cols[4].innerText + "\n";
+    }
+  });
+
+  const blob =
+    new Blob([csv], {
+      type: "text/csv"
+    });
+
+  const url =
+    window.URL.createObjectURL(blob);
+
+  const a =
+    document.createElement("a");
+
+  a.href = url;
+  a.download = "expenses.csv";
+
+  a.click();
+}
+function downloadPDF() {
+
+  const { jsPDF } = window.jspdf;
+
+  const doc = new jsPDF();
+
+  doc.setFontSize(18);
+
+  doc.text(
+    "Student Expense Tracker Report",
+    20,
+    20
+  );
+
+  doc.setFontSize(12);
+  doc.setFont("helvetica");
+
+  let y = 40;
+
+  const rows =
+    document.querySelectorAll("#expenseTable tr");
+
+  rows.forEach(row => {
+
+    const cols =
+      row.querySelectorAll("td");
+
+    if (cols.length > 0) {
+
+      const line =
+      cols[0].innerText + " | " +
+      cols[1].innerText + " | Rs." +
+      cols[2].innerText + " | " +
+      cols[3].innerText + " | " +
+      cols[4].innerText;
+      doc.text(line, 20, y);
+
+      y += 10;
+    }
+
+  });
+
+  doc.save("Expense_Report.pdf");
+}
+// LOAD EXPENSES
+function loadExpenses() {
+
+  const userId = localStorage.getItem("userId");
+
+fetch(`http://localhost:5000/expenses/${userId}`, {
+  headers: {
+    Authorization: localStorage.getItem("token")
+  }
+})
+    .then(res => res.json())
+    .then(data => {
+      let highest = 0;
+      let lowest = Infinity;
+      let rows = "";
+      let total = 0;
+      let categoryTotals = {};
+      data.forEach(expense => {
+        if (!categoryTotals[expense.category]) {
+        categoryTotals[expense.category] = 0;
+}
+
+        categoryTotals[expense.category] += Number(expense.amount);
+        total += Number(expense.amount);
+         const amount = Number(expense.amount);
+
+        if (highest < amount) {
+        highest = amount;
+        }
+
+      if (lowest === 0 || amount < lowest) {
+      lowest = amount;
+      }
+        rows += `
+          <tr data-date="${expense.expense_date}">
+            <td>${expense.id}</td>
+            <td>${expense.title}</td>
+            <td>${expense.amount}</td>
+            <td>${expense.category}</td>
+            <td>${expense.expense_date.split("T")[0]}</td>
+            <td>
+            <button
+            class="edit-btn"
+            onclick="editExpense(${expense.id}, '${expense.title}', '${expense.amount}', '${expense.category}')">
+            Edit
+            </button>
+
+          <button
+          class="delete-btn"
+          onclick="deleteExpense(${expense.id})">
+          Delete
+          </button>
+            </td>
+          </tr>
+        `;
+      });
+      if (data.length === 0) {
+  rows = `
+    <tr>
+      <td colspan="6">
+        No Expenses Found
+      </td>
+    </tr>
+  `;
+}
+      document.getElementById("expenseTable").innerHTML = rows;
+
+      document.getElementById("totalExpense").innerText =
+  "💰 Total Expense: ₹" + total;
+
+      loadBudget();
+
+      document.getElementById("totalTransactions").innerText =
+  "📊 Total Transactions: " + data.length;
+      document.getElementById("highestExpense").innerText ="📈 Highest: ₹" + highest;
+      document.getElementById("lowestExpense").innerText ="📉 Lowest: ₹" + (lowest === Infinity ? 0 : lowest);
+      document.getElementById("averageExpense").innerText =
+  "🧮 Average: ₹" +
+  (data.length ? (total / data.length).toFixed(2) : 0);
+      let summaryHtml = "";
+
+    for (let category in categoryTotals) {
+    summaryHtml +=
+    `<p>${category}: ₹${categoryTotals[category]}</p>`;
+}
+
+document.getElementById("categorySummary").innerHTML =
+  summaryHtml;
+  let topCategory = "";
+let maxAmount = 0;
+
+for (let category in categoryTotals) {
+  if (categoryTotals[category] > maxAmount) {
+    maxAmount = categoryTotals[category];
+    topCategory = category;
+  }
+}
+
+document.getElementById("topCategory").innerText =
+  "🏆 Top Category: " + topCategory + " (₹" + maxAmount + ")";
+  const budget =
+  parseFloat(
+    document.getElementById("budgetDisplay")
+    .innerText
+    .replace(/[^\d.]/g, "")
+  ) || 0;
+  let suggestions = "";
+
+// FOOD OVERSPENDING
+if (
+  categoryTotals["food"] &&
+  categoryTotals["food"] > total * 0.4
+) {
+  suggestions +=
+    "<p>🍔 Food spending is too high. Try reducing outside food expenses.</p>";
+}
+
+// DRINK OVERSPENDING
+if (
+  categoryTotals["drink"] &&
+  categoryTotals["drink"] > total * 0.3
+) {
+  suggestions +=
+    "<p>🥤 Drink expenses are high. Limit soft drinks and coffee purchases.</p>";
+}
+
+// TOO MANY TRANSACTIONS
+if (data.length > 10) {
+  suggestions +=
+    "<p>🛒 You have many transactions. Track unnecessary small expenses.</p>";
+}
+
+// SHOPPING OVERSPENDING
+if (
+  categoryTotals["shopping"] &&
+  categoryTotals["shopping"] > total * 0.4
+) {
+  suggestions +=
+    "<p>🛍️ Shopping expenses are too high. Avoid unnecessary purchases.</p>";
+}
+
+// BUDGET EXCEEDED
+if (total > budget) {
+  suggestions +=
+    "<p>⚠️ You have exceeded your monthly budget.</p>";
+}
+// LOW REMAINING BUDGET
+if ((budget - total) < 200 && budget > 0) {
+  suggestions +=
+    "<p>🚨 Your remaining budget is very low.</p>";
+}
+
+// HIGH TOTAL SPENDING
+if (total > 5000) {
+  suggestions +=
+    "<p>💸 Monthly spending is high. Consider setting stricter limits.</p>";
+}
+
+// NO SUGGESTIONS
+if (suggestions === "") {
+  suggestions =
+    "<p>✅ Great job! Your spending looks balanced.</p>";
+}
+
+document.getElementById("aiSuggestions").innerHTML =
+  suggestions;
+const labels = Object.keys(categoryTotals);
+const values = Object.values(categoryTotals);
+
+const ctx = document
+  .getElementById("expenseChart")
+  .getContext("2d");
+
+if (expenseChart) {
+  expenseChart.destroy();
+}
+
+expenseChart = new Chart(ctx, {
+  type: "pie",
+  data: {
+    labels: labels,
+    datasets: [{
+      data: values
+    }]
+  }
+});
+// MONTHLY BAR CHART
+
+let monthlyTotals = {};
+
+data.forEach(expense => {
+
+  const month =
+    expense.expense_date.substring(0, 7);
+
+  if (!monthlyTotals[month]) {
+    monthlyTotals[month] = 0;
+  }
+
+  monthlyTotals[month] +=
+    Number(expense.amount);
+
+});
+
+const monthLabels =
+  Object.keys(monthlyTotals);
+
+const monthValues =
+  Object.values(monthlyTotals);
+
+const monthlyCtx =
+  document
+    .getElementById("monthlyChart")
+    .getContext("2d");
+
+if (monthlyChart) {
+  monthlyChart.destroy();
+}
+
+monthlyChart = new Chart(monthlyCtx, {
+  type: "bar",
+  data: {
+    labels: monthLabels,
+    datasets: [{
+      label: "Monthly Expenses",
+      data: monthValues
+    }]
+  },
+  options: {
+    responsive: true
+  }
+});
+    })
+    .catch(err => {
+      console.log(err);
+      alert("Error loading expenses");
+    });
+}
+
+// DELETE EXPENSE
+function deleteExpense(id) {
+   if (!confirm("Are you sure you want to delete this expense?")) {
+  return;
+  }
+  fetch(`http://localhost:5000/expenses/${id}`, {
+    method: "DELETE"
+  })
+  .then(res => res.json())
+  .then(data => {
+    alert(data.message);
+    loadExpenses();
+  })
+  .catch(err => {
+    console.log(err);
+    alert("Delete failed");
+  });
+}
+
+// EDIT EXPENSE
+function editExpense(id, title, amount, category) {
+
+  const newTitle = prompt("Enter new title:", title);
+  if (newTitle === null) return;
+
+  const newAmount = prompt("Enter new amount:", amount);
+  if (newAmount === null) return;
+
+  const newCategory = prompt("Enter new category:", category);
+  if (newCategory === null) return;
+
+  fetch(`http://localhost:5000/expenses/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      title: newTitle,
+      amount: newAmount,
+      category: newCategory
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    alert(data.message);
+    loadExpenses();
+  })
+  .catch(err => {
+    console.log(err);
+    alert("Update failed");
+  });
+}
+
+// LOAD WHEN PAGE OPENS
+loadExpenses();
+loadBudget();
+function toggleDarkMode() {
+
+  document.body.classList.toggle("dark-mode");
+
+  if (document.body.classList.contains("dark-mode")) {
+    localStorage.setItem("darkMode", "on");
+  } else {
+    localStorage.setItem("darkMode", "off");
+  }
+
+}
+function logout() {
+
+  localStorage.removeItem("userId");
+  localStorage.removeItem("userName");
+
+  alert("Logged Out Successfully");
+
+  window.location.href = "test.html";
+}
+// ================= SAVE BUDGET =================
+function saveBudget() {
+
+  const amount =
+    document.getElementById("budgetAmount").value;
+    if (!amount || amount <= 0) {
+    alert("Enter valid budget");
+    return;
+    }
+
+  fetch("http://localhost:5000/budget", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      user_id: userId,
+      amount: amount
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    alert(data.message);
+    document.getElementById("budgetAmount").value = "";
+    loadBudget();
+  })
+  .catch(err => {
+    console.log(err);
+    alert("Budget save failed");
+  });
+}
+
+// ================= LOAD BUDGET =================
+function loadBudget() {
+
+  fetch(`http://localhost:5000/budget/${userId}`)
+    .then(res => res.json())
+    .then(data => {
+
+      const budget =
+        Number(data.amount || 0);
+
+      const totalText =
+  document.getElementById("totalExpense")
+  .innerText;
+
+const spent =
+  parseFloat(
+    totalText.replace(/[^\d.]/g, "")
+  ) || 0;
+
+      document.getElementById("budgetDisplay").innerText ="🎯 Budget: ₹" + budget;
+      document.getElementById("remainingBudget").innerText ="💵 Remaining: ₹" + (budget - spent);
+      const percent =
+  budget > 0
+    ? ((spent / budget) * 100).toFixed(1)
+    : 0;
+
+  document.getElementById("budgetPercent").innerText =
+  "📋 Used: " + percent + "%";
+  document.getElementById("progressFill").style.width =
+  percent + "%";
+    })
+
+    .catch(err => {
+      console.log(err);
+    });
+}
+</script>
+<footer style="
+text-align:center;
+margin-top:30px;
+padding:15px;
+background:#1e3a8a;
+color:white;
+border-radius:10px;">
+Student Expense Tracker © 2026
+</footer>
+</body>
+</html>
