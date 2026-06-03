@@ -2,8 +2,19 @@ const express = require("express");
 const cors = require("cors");
 const db = require("./db");
 const bcrypt = require("bcrypt");
+require("dotenv").config();
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+const genAI = new GoogleGenerativeAI(
+  process.env.GEMINI_API_KEY
+);
+
+const model = genAI.getGenerativeModel({
+  model: "gemini-2.0-flash"
+});
 const jwt = require("jsonwebtoken");
 const app = express();
+
 
 app.use(cors());
 app.use(express.json());
@@ -88,8 +99,14 @@ res.json({
 
 // ================= ADD EXPENSE =================
 app.post("/expenses/add", (req, res) => {
-  const { user_id, title, amount, category, expense_date } = req.body;
+ const {
+  user_id,
+  title,
+  amount,
+  category
+} = req.body;
 
+const expense_date = new Date();
   db.query(
     "INSERT INTO expenses (user_id, title, amount, category, expense_date) VALUES (?, ?, ?, ?, ?)",
     [user_id, title, amount, category, expense_date],
@@ -235,6 +252,41 @@ function verifyToken(req, res, next) {
 
   }
 }
+/*app.post("/ai-tip", async (req, res) => {
+  try {
+
+    const { expenses } = req.body;
+
+    const prompt = `
+    You are a personal finance advisor for college students.
+
+    Analyze these expenses:
+
+    ${JSON.stringify(expenses)}
+
+    Give 3 short saving tips.
+    `;
+
+    const result =
+      await model.generateContent(prompt);
+
+    const response =
+      result.response.text();
+
+    res.json({
+      tip: response
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    res.status(500).json({
+      error: error.message
+    });
+
+  }
+});*/
 // ================= START SERVER =================
 app.listen(5000, () => {
   console.log("Server running on port 5000");

@@ -1,45 +1,191 @@
 <!DOCTYPE html>
+
 <html>
 <head>
-  <title>Student Expense Tracker Test</title>
+  <title>Student Expense Tracker</title>
+
+  <style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',sans-serif;
+}
+
+body{
+    min-height:100vh;
+    background:linear-gradient(135deg,#0f172a,#1e3a8a,#2563eb);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    padding:20px;
+}
+
+.logo{
+    text-align:center;
+    color:white;
+    margin-bottom:30px;
+}
+
+.logo h1{
+    font-size:42px;
+    font-weight:700;
+    margin-bottom:10px;
+}
+
+.logo p{
+    font-size:18px;
+    opacity:0.9;
+}
+
+.container{
+    width:1000px;
+    max-width:95%;
+    display:flex;
+    gap:30px;
+}
+
+.card{
+    flex:1;
+    background:white;
+    padding:35px;
+    border-radius:20px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.25);
+    transition:0.3s;
+}
+
+.card:hover{
+    transform:translateY(-5px);
+}
+
+.card h2{
+    text-align:center;
+    color:#1e3a8a;
+    margin-bottom:25px;
+}
+
+input{
+    width:100%;
+    padding:14px;
+    margin-bottom:15px;
+    border:1px solid #d1d5db;
+    border-radius:10px;
+    font-size:15px;
+    outline:none;
+}
+
+input:focus{
+    border-color:#2563eb;
+    box-shadow:0 0 8px rgba(37,99,235,0.3);
+}
+
+button{
+    width:100%;
+    padding:14px;
+    border:none;
+    background:#2563eb;
+    color:white;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:16px;
+    font-weight:600;
+    transition:0.3s;
+}
+
+button:hover{
+    background:#1d4ed8;
+}
+
+.divider{
+    text-align:center;
+    margin:15px 0;
+    color:#64748b;
+}
+
+.footer{
+    margin-top:25px;
+    color:white;
+    font-size:14px;
+}
+
+@media(max-width:768px){
+    .container{
+        flex-direction:column;
+    }
+
+    .logo h1{
+        font-size:32px;
+    }
+}
+</style>
 </head>
 
 <body>
 
-<h2>Register</h2>
+<div class="logo">
+  <h1>💰 Student Expense Tracker</h1>
+  <p>Manage Your Daily Expenses Smartly</p>
+</div>
 
-<input id="name" placeholder="name"><br><br>
-<input id="email" placeholder="email"><br><br>
-<input id="password" placeholder="password"><br><br>
+<div class="container">
 
-<button onclick="register()">Register</button>
+  <!-- Register Card -->
+  <div class="card">
 
-<hr>
+    <h2>Create Account</h2>
 
-<h2>Login</h2>
+    <input
+      id="name"
+      type="text"
+      placeholder="Full Name">
 
-<input id="loginEmail" placeholder="email"><br><br>
-<input id="loginPassword" placeholder="password"><br><br>
+    <input
+      id="email"
+      type="email"
+      placeholder="Email Address">
 
-<button onclick="login()">Login</button>
+    <input
+      id="password"
+      type="password"
+      placeholder="Password">
 
-<hr>
+    <button onclick="register()">
+      Register
+    </button>
 
-<h2>Add Expense</h2>
+  </div>
 
-<input id="title" placeholder="Expense Title"><br><br>
-<input id="amount" placeholder="Amount"><br><br>
-<input id="category" placeholder="Category"><br><br>
+  <!-- Login Card -->
+  <div class="card">
 
-<button onclick="addExpense()">Add Expense</button>
+    <h2>Welcome Back</h2>
+
+    <input
+      id="loginEmail"
+      type="email"
+      placeholder="Email Address">
+
+    <input
+      id="loginPassword"
+      type="password"
+      placeholder="Password">
+
+    <button onclick="login()">
+      Login
+    </button>
+
+  </div>
+
+</div>
 
 <script>
 
-// Logged in user id
 let loggedInUserId = null;
 
 // ================= REGISTER =================
 function register() {
+
   fetch("http://localhost:5000/auth/register", {
     method: "POST",
     headers: {
@@ -51,15 +197,31 @@ function register() {
       password: document.getElementById("password").value
     })
   })
+
   .then(res => res.json())
+
   .then(data => {
-    alert("REGISTER: " + JSON.stringify(data));
+
+    alert("Registration Successful! Please Login.");
+
+    document.getElementById("loginEmail").value =
+      document.getElementById("email").value;
+
+    document.getElementById("name").value = "";
+    document.getElementById("email").value = "";
+    document.getElementById("password").value = "";
+
   })
-  .catch(err => alert(err));
+
+  .catch(err => {
+    console.log(err);
+    alert("Registration Failed");
+  });
 }
 
 // ================= LOGIN =================
 function login() {
+
   fetch("http://localhost:5000/auth/login", {
     method: "POST",
     headers: {
@@ -70,58 +232,33 @@ function login() {
       password: document.getElementById("loginPassword").value
     })
   })
+
   .then(res => res.json())
+
   .then(data => {
 
     if (data.user) {
 
-      loggedInUserId = data.user.id;
       localStorage.setItem("userId", data.user.id);
       localStorage.setItem("userName", data.user.name);
       localStorage.setItem("token", data.token);
 
-      alert(
-        "Login Successful\n" +
-        "User ID: " + loggedInUserId +
-        "\nName: " + data.user.name
-      );
+      alert("Login Successful!");
+
+      window.location.href = "expenses.html";
 
     } else {
 
-      alert(data.message);
+      alert(data.message || "Invalid Login");
 
     }
 
   })
-  .catch(err => alert(err));
-}
 
-// ================= ADD EXPENSE =================
-function addExpense() {
-
-  if (!loggedInUserId) {
-    alert("Please login first");
-    return;
-  }
-
-  fetch("http://localhost:5000/expenses/add", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      user_id: loggedInUserId,
-      title: document.getElementById("title").value,
-      amount: document.getElementById("amount").value,
-      category: document.getElementById("category").value,
-      expense_date: "2026-05-22"
-    })
-  })
-  .then(res => res.json())
-  .then(data => {
-    alert("EXPENSE: " + JSON.stringify(data));
-  })
-  .catch(err => alert(err));
+  .catch(err => {
+    console.log(err);
+    alert("Login Failed");
+  });
 }
 
 </script>
